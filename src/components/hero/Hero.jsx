@@ -83,12 +83,12 @@ const Hero = () => {
       ref={containerRef}
       className="relative bg-white pt-6 sm:pt-10 lg:pt-16 pb-14 sm:pb-20 lg:pb-28 overflow-hidden"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* Top 2-Column Hero Header */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-12 items-start">
           {/* Left Column: Typewriter Headline */}
           <div className="lg:col-span-6 gsap-hero-title min-h-[90px] sm:min-h-[120px] lg:min-h-[150px] flex items-center">
-            <h1 className="font-['Montserrat'] font-extrabold text-3xl sm:text-4xl md:text-5xl lg:text-[52px] xl:text-[56px] text-[#121212] leading-[1.14] tracking-tight">
+            <h1 className="font-['Montserrat'] font-extrabold text-3xl sm:text-5xl lg:text-[58px] xl:text-[64px] text-[#121212] leading-[1.12] tracking-tight">
               <span>{displayedText}</span>
               <span className="text-[#0e52ff] font-light cursor-blink select-none ml-1">|</span>
             </h1>
@@ -96,7 +96,7 @@ const Hero = () => {
 
           {/* Right Column: Subtitle + Download CTA */}
           <div className="lg:col-span-6 flex flex-col justify-start">
-            <p className="gsap-hero-desc text-base sm:text-lg lg:text-[22px] leading-relaxed sm:leading-[34px] font-medium text-[#9d9d9d]">
+            <p className="gsap-hero-desc text-base sm:text-lg lg:text-[24px] xl:text-[26px] leading-relaxed sm:leading-[36px] font-medium text-[#9d9d9d]">
               Choose your city, pick your car and enjoy the journey with Garibook’s best drivers.
             </p>
 
@@ -105,10 +105,14 @@ const Hero = () => {
                 href="https://onelink.to/gbweb"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-[#fdd300] hover:bg-[#eec600] active:scale-[0.98] text-black font-semibold text-base sm:text-lg lg:text-[19px] px-7 sm:px-8 py-3.5 sm:py-4 rounded-[15px] border-2 border-[#fdd300] shadow-sm transition-all duration-150 cursor-pointer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-[#fdd300] hover:bg-[#eec600] active:scale-[0.98] text-black font-semibold text-base sm:text-lg lg:text-[19px] px-8 py-3.5 sm:py-4 rounded-[15px] border-2 border-[#fdd300] shadow-sm transition-all duration-150 cursor-pointer group"
               >
                 <span>Download App</span>
-                <img src={rightArrow} alt="" className="w-5 h-5 object-contain" />
+                <img
+                  src={rightArrow}
+                  alt=""
+                  className="w-5 h-5 object-contain group-hover:translate-x-1.5 transition-transform duration-200"
+                />
               </a>
             </div>
           </div>
@@ -124,3 +128,4 @@ const Hero = () => {
 };
 
 export default Hero;
+
