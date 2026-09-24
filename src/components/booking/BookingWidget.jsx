@@ -4,6 +4,7 @@ import downArrow from '../../assets/garibook/Down_Arrow_3_.png';
 import pickupPin from '../../assets/garibook/Frame76.svg';
 import dropoffPin from '../../assets/garibook/fi_14910621.svg';
 import calendarIcon from '../../assets/garibook/fi_12516022.svg';
+import clockIcon from '../../assets/garibook/clock1.png';
 import rightArrow from '../../assets/garibook/right-arrow.png';
 
 const CAR_OPTIONS = [
@@ -23,6 +24,19 @@ const AIRPORTS = [
   'Barishal Airport, Barishal',
 ];
 
+const HOURLY_OPTIONS = [
+  '2 Hours',
+  '3 Hours',
+  '4 Hours',
+  '5 Hours',
+  '6 Hours',
+  '7 Hours',
+  '8 Hours',
+  '10 Hours',
+  '12 Hours',
+  '24 Hours',
+];
+
 const BookingWidget = () => {
   const [activeTab, setActiveTab] = useState('car'); // 'car' or 'airport'
   const [tripType, setTripType] = useState('oneway'); // 'oneway' | 'roundway' | 'hourly'
@@ -34,6 +48,8 @@ const BookingWidget = () => {
   const [pickupLocation, setPickupLocation] = useState('');
   const [dropoffLocation, setDropoffLocation] = useState('');
   const [dateTime, setDateTime] = useState('');
+  const [returnDateTime, setReturnDateTime] = useState('');
+  const [hoursCount, setHoursCount] = useState(2);
   const [selectedAirport, setSelectedAirport] = useState('');
 
   const carDropdownRef = useRef(null);
@@ -54,17 +70,19 @@ const BookingWidget = () => {
     alert(`Searching trips for: ${activeTab === 'car' ? 'Car Rental' : 'Airport Rental'}`);
   };
 
+  const isRoundWay = activeTab === 'car' && tripType === 'roundway';
+
   return (
     <div className="w-full relative z-20 booking-widget-root">
       {/* Tab Switchers */}
-      <div className="flex items-center space-x-2 pl-2">
+      <div className="inline-flex items-center gap-1.5 bg-white p-2 rounded-t-xl shadow-md border-b-0">
         <button
           type="button"
           onClick={() => setActiveTab('car')}
-          className={`px-7 py-3.5 rounded-t-xl font-bold text-base sm:text-lg transition-all cursor-pointer ${
+          className={`px-6 sm:px-8 py-3 rounded-lg font-bold text-base sm:text-lg transition-all cursor-pointer ${
             activeTab === 'car'
-              ? 'bg-[#121212] text-white shadow-md'
-              : 'bg-gray-100/80 text-gray-700 hover:text-black'
+              ? 'bg-[#121212] text-white shadow-sm'
+              : 'bg-transparent text-[#121212] hover:bg-gray-100 font-semibold'
           }`}
         >
           Car Rental
@@ -72,10 +90,10 @@ const BookingWidget = () => {
         <button
           type="button"
           onClick={() => setActiveTab('airport')}
-          className={`px-7 py-3.5 rounded-t-xl font-bold text-base sm:text-lg transition-all cursor-pointer ${
+          className={`px-6 sm:px-8 py-3 rounded-lg font-bold text-base sm:text-lg transition-all cursor-pointer ${
             activeTab === 'airport'
-              ? 'bg-[#121212] text-white shadow-md'
-              : 'bg-gray-100/80 text-gray-700 hover:text-black'
+              ? 'bg-[#121212] text-white shadow-sm'
+              : 'bg-transparent text-[#121212] hover:bg-gray-100 font-semibold'
           }`}
         >
           Airport Rental
@@ -83,12 +101,12 @@ const BookingWidget = () => {
       </div>
 
       {/* Main Widget Card */}
-      <div className="bg-white rounded-2xl rounded-tl-none shadow-2xl border border-gray-100 p-5 sm:p-7 md:p-8">
+      <div className="bg-white rounded-2xl rounded-tl-none shadow-2xl border border-gray-100 p-6 sm:p-8">
         <form onSubmit={handleSubmit}>
-          {/* 4 Fields Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-0 lg:divide-x divide-gray-200 pb-6 border-b border-gray-100">
+          {/* Row 1: 4 Columns Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-0 pb-6 border-b border-gray-100">
             {/* Field 1: Choose a Car */}
-            <div className="lg:pr-6 relative" ref={carDropdownRef}>
+            <div className="lg:pr-6 lg:border-r border-gray-200 relative" ref={carDropdownRef}>
               <label className="flex items-center gap-2 mb-2 text-[#121212] font-semibold text-base sm:text-[17px]">
                 <img src={carIcon} alt="" className="w-5 h-5 object-contain" />
                 <span>
@@ -149,9 +167,9 @@ const BookingWidget = () => {
               )}
             </div>
 
-            {/* Field 2: Pickup Location / Pickup Airport */}
-            <div className="lg:px-6">
-              {activeTab === 'car' ? (
+            {/* Field 2: Pickup Location OR Pickup Airport */}
+            <div className="lg:px-6 lg:border-r border-gray-200">
+              {activeTab === 'car' || airportTripType === 'from-home' ? (
                 <>
                   <label className="flex items-center gap-2 mb-2 text-[#121212] font-semibold text-base sm:text-[17px]">
                     <img src={pickupPin} alt="" className="w-5 h-5 object-contain" />
@@ -195,46 +213,155 @@ const BookingWidget = () => {
               )}
             </div>
 
-            {/* Field 3: Drop-off Location */}
-            <div className="lg:px-6">
-              <label className="flex items-center gap-2 mb-2 text-[#121212] font-semibold text-base sm:text-[17px]">
-                <img src={dropoffPin} alt="" className="w-5 h-5 object-contain" />
-                <span>
-                  Drop-off Location <span className="text-red-500 font-bold">*</span>
-                </span>
-              </label>
-              <input
-                type="text"
-                required
-                value={dropoffLocation}
-                onChange={(e) => setDropoffLocation(e.target.value)}
-                placeholder="Enter Drop-off Location"
-                className="w-full h-11 text-[15px] text-gray-800 placeholder-gray-400 bg-transparent focus:outline-none focus:ring-0 border-b md:border-none border-gray-200 px-1"
-              />
+            {/* Field 3: Drop-off Location OR Drop-off Airport */}
+            <div className="lg:px-6 lg:border-r border-gray-200">
+              {activeTab === 'car' && tripType === 'hourly' ? (
+                <>
+                  <label className="flex items-center gap-2 mb-2 text-[#121212] font-semibold text-base sm:text-[17px]">
+                    <img src={calendarIcon} alt="" className="w-5 h-5 object-contain" />
+                    <span>
+                      Pickup Date & Time <span className="text-red-500 font-bold">*</span>
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={dateTime}
+                    onChange={(e) => setDateTime(e.target.value)}
+                    placeholder="MM/DD/YYYY 00:00 PM"
+                    onFocus={(e) => (e.target.type = 'datetime-local')}
+                    onBlur={(e) => {
+                      if (!e.target.value) e.target.type = 'text';
+                    }}
+                    className="w-full h-11 text-[15px] text-gray-800 placeholder-gray-400 bg-transparent focus:outline-none focus:ring-0 border-b md:border-none border-gray-200 px-1"
+                  />
+                </>
+              ) : activeTab === 'airport' && airportTripType === 'from-home' ? (
+                <>
+                  <label className="flex items-center gap-2 mb-2 text-[#121212] font-semibold text-base sm:text-[17px]">
+                    <img src={dropoffPin} alt="" className="w-5 h-5 object-contain" />
+                    <span>
+                      Drop-off Airport <span className="text-red-500 font-bold">*</span>
+                    </span>
+                  </label>
+                  <select
+                    value={selectedAirport}
+                    onChange={(e) => setSelectedAirport(e.target.value)}
+                    required
+                    className="w-full h-11 text-[15px] bg-transparent text-gray-800 focus:outline-none border-b md:border-none border-gray-200 px-1 cursor-pointer"
+                  >
+                    <option value="" disabled>
+                      Select Airport
+                    </option>
+                    {AIRPORTS.map((airport) => (
+                      <option key={airport} value={airport}>
+                        {airport}
+                      </option>
+                    ))}
+                  </select>
+                </>
+              ) : (
+                <>
+                  <label className="flex items-center gap-2 mb-2 text-[#121212] font-semibold text-base sm:text-[17px]">
+                    <img src={dropoffPin} alt="" className="w-5 h-5 object-contain" />
+                    <span>
+                      Drop-off Location <span className="text-red-500 font-bold">*</span>
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={dropoffLocation}
+                    onChange={(e) => setDropoffLocation(e.target.value)}
+                    placeholder="Enter Drop-off Location"
+                    className="w-full h-11 text-[15px] text-gray-800 placeholder-gray-400 bg-transparent focus:outline-none focus:ring-0 border-b md:border-none border-gray-200 px-1"
+                  />
+                </>
+              )}
             </div>
 
-            {/* Field 4: Pickup Date & Time */}
+            {/* Field 4: Select Hours (when hourly, on the right side) OR Pickup Date & Time */}
             <div className="lg:pl-6">
-              <label className="flex items-center gap-2 mb-2 text-[#121212] font-semibold text-base sm:text-[17px]">
-                <img src={calendarIcon} alt="" className="w-5 h-5 object-contain" />
-                <span>
-                  Pickup Date & Time <span className="text-red-500 font-bold">*</span>
-                </span>
-              </label>
-              <input
-                type="text"
-                required
-                value={dateTime}
-                onChange={(e) => setDateTime(e.target.value)}
-                placeholder="MM/DD/YYYY 00:00 PM"
-                onFocus={(e) => (e.target.type = 'datetime-local')}
-                onBlur={(e) => {
-                  if (!e.target.value) e.target.type = 'text';
-                }}
-                className="w-full h-11 text-[15px] text-gray-800 placeholder-gray-400 bg-transparent focus:outline-none focus:ring-0 border-b md:border-none border-gray-200 px-1"
-              />
+              {activeTab === 'car' && tripType === 'hourly' ? (
+                <>
+                  <label className="flex items-center gap-2 mb-2 text-[#121212] font-semibold text-base sm:text-[17px]">
+                    <img src={clockIcon} alt="" className="w-5 h-5 object-contain" />
+                    <span>
+                      Select Hours <span className="text-red-500 font-bold">*</span>
+                    </span>
+                  </label>
+                  <div className="w-full h-11 flex items-center justify-between border-b md:border-none border-gray-200 px-1">
+                    <button
+                      type="button"
+                      onClick={() => setHoursCount((prev) => Math.max(2, prev - 1))}
+                      className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 active:scale-95 flex items-center justify-center font-bold text-gray-700 text-lg transition-all cursor-pointer"
+                      title="Decrease hours"
+                    >
+                      -
+                    </button>
+                    <span className="font-semibold text-gray-900 text-[15px] select-none">
+                      {hoursCount} Hours
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setHoursCount((prev) => Math.min(24, prev + 1))}
+                      className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 active:scale-95 flex items-center justify-center font-bold text-gray-700 text-lg transition-all cursor-pointer"
+                      title="Increase hours"
+                    >
+                      +
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <label className="flex items-center gap-2 mb-2 text-[#121212] font-semibold text-base sm:text-[17px]">
+                    <img src={calendarIcon} alt="" className="w-5 h-5 object-contain" />
+                    <span>
+                      Pickup Date & Time <span className="text-red-500 font-bold">*</span>
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={dateTime}
+                    onChange={(e) => setDateTime(e.target.value)}
+                    placeholder="MM/DD/YYYY 00:00 PM"
+                    onFocus={(e) => (e.target.type = 'datetime-local')}
+                    onBlur={(e) => {
+                      if (!e.target.value) e.target.type = 'text';
+                    }}
+                    className="w-full h-11 text-[15px] text-gray-800 placeholder-gray-400 bg-transparent focus:outline-none focus:ring-0 border-b md:border-none border-gray-200 px-1"
+                  />
+                </>
+              )}
             </div>
           </div>
+
+          {/* Row 2: Return Date & Time (Only for Round Way, neatly in Col 1) */}
+          {isRoundWay && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-0 pt-6 pb-6 border-b border-gray-100 animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="lg:pr-6">
+                <label className="flex items-center gap-2 mb-2 text-[#121212] font-semibold text-base sm:text-[17px]">
+                  <img src={calendarIcon} alt="" className="w-5 h-5 object-contain" />
+                  <span>
+                    Return Date & Time <span className="text-red-500 font-bold">*</span>
+                  </span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={returnDateTime}
+                  onChange={(e) => setReturnDateTime(e.target.value)}
+                  placeholder="MM/DD/YYYY 00:00 PM"
+                  onFocus={(e) => (e.target.type = 'datetime-local')}
+                  onBlur={(e) => {
+                    if (!e.target.value) e.target.type = 'text';
+                  }}
+                  className="w-full h-11 text-[15px] text-gray-800 placeholder-gray-400 bg-transparent focus:outline-none focus:ring-0 border-b md:border-none border-gray-200 px-1"
+                />
+              </div>
+            </div>
+          )}
 
           {/* Bottom Bar: Trip Type Radio Options + Submit Button */}
           <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-5">
@@ -250,21 +377,21 @@ const BookingWidget = () => {
                     <label
                       key={option.key}
                       onClick={() => setTripType(option.key)}
-                      className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-colors ${
+                      className={`inline-flex items-center gap-2.5 px-4 py-2.5 rounded-lg text-base font-semibold cursor-pointer transition-colors ${
                         tripType === option.key
-                          ? 'bg-blue-50 text-[#0e52ff]'
-                          : 'text-gray-600 hover:text-gray-900 bg-transparent'
+                          ? 'bg-[#f2f2ff] text-[#0e52ff]'
+                          : 'text-[#121212] hover:bg-gray-50 bg-transparent'
                       }`}
                     >
                       <span
-                        className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
                           tripType === option.key
-                            ? 'border-[#0e52ff]'
-                            : 'border-gray-300'
+                            ? 'border-[#0e52ff] bg-white'
+                            : 'border-gray-300 bg-[#e9e9e9]'
                         }`}
                       >
                         {tripType === option.key && (
-                          <span className="w-2 h-2 rounded-full bg-[#0e52ff]" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#0e52ff]" />
                         )}
                       </span>
                       <span>{option.label}</span>
@@ -280,21 +407,21 @@ const BookingWidget = () => {
                     <label
                       key={option.key}
                       onClick={() => setAirportTripType(option.key)}
-                      className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-colors ${
+                      className={`inline-flex items-center gap-2.5 px-4 py-2.5 rounded-lg text-base font-semibold cursor-pointer transition-colors ${
                         airportTripType === option.key
-                          ? 'bg-blue-50 text-[#0e52ff]'
-                          : 'text-gray-600 hover:text-gray-900 bg-transparent'
+                          ? 'bg-[#f2f2ff] text-[#0e52ff]'
+                          : 'text-[#121212] hover:bg-gray-50 bg-transparent'
                       }`}
                     >
                       <span
-                        className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
                           airportTripType === option.key
-                            ? 'border-[#0e52ff]'
-                            : 'border-gray-300'
+                            ? 'border-[#0e52ff] bg-white'
+                            : 'border-gray-300 bg-[#e9e9e9]'
                         }`}
                       >
                         {airportTripType === option.key && (
-                          <span className="w-2 h-2 rounded-full bg-[#0e52ff]" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#0e52ff]" />
                         )}
                       </span>
                       <span>{option.label}</span>
@@ -307,7 +434,7 @@ const BookingWidget = () => {
             {/* Continue CTA Button */}
             <button
               type="submit"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-[#0e52ff] hover:bg-[#0038c4] text-white font-bold text-base px-8 py-3.5 rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 transition-all cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-[#0e52ff] hover:bg-[#0038c4] active:scale-[0.98] text-white font-bold text-base px-10 py-3.5 rounded-xl shadow-lg shadow-blue-500/25 transition-all cursor-pointer"
             >
               <span>Continue</span>
               <img src={rightArrow} alt="" className="w-5 h-5 brightness-0 invert" />
